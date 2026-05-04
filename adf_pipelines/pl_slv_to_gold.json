@@ -1,0 +1,383 @@
+{
+    "name": "pl_slv_to_gold",
+    "properties": {
+        "description": "This pipeline takes data from bonze and transforms to silver and then gold",
+        "activities": [
+            {
+                "name": "slv_Claims",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Claims"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_Encounters",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Encounters"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_Transactions",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Transactions"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_Providers",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Providers"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_Patients",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Patients"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_NPI_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/NPI_Codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_ICD_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/ICD_Codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_Departments",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/Departments"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "slv_CPT_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/03 Silver/CPT_Codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_CPT_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_CPT_Codes",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_cpt_code"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_Departments",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_Departments",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_department"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_ICD_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_ICD_Codes",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_icd_code"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_slv_Transactions",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_Transactions",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/fact_transaction"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_Providers",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_Providers",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_provider"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_Patients",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_Patients",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_patient"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "gld_NPI_Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "slv_NPI_Codes",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/04 Gold/dim_npi"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "folder": {
+            "name": "rcm"
+        },
+        "annotations": [],
+        "lastPublishTime": "2026-02-09T08:36:44Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

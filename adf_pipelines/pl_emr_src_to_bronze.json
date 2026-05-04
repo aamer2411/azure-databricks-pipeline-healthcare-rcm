@@ -1,0 +1,278 @@
+{
+    "name": "pl_emr_src_to_bronze",
+    "properties": {
+        "description": "This pipeline is used for copying data from Azure SQL db to ADLS Bronze",
+        "activities": [
+            {
+                "name": "emr_config",
+                "description": "Here we check the presence of load_config.csv file which contains the parameters for pipeline runs",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "DelimitedTextSource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "recursive": true,
+                            "enablePartitionDiscovery": false
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextReadSettings"
+                        }
+                    },
+                    "dataset": {
+                        "referenceName": "ds_adls_flat_file",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "container": {
+                                "value": "@pipeline().parameters.emr_config_container",
+                                "type": "Expression"
+                            },
+                            "file_path": {
+                                "value": "@pipeline().parameters.emr_config_file_path",
+                                "type": "Expression"
+                            },
+                            "file_name": {
+                                "value": "@pipeline().parameters.emr_config_file_name",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "firstRowOnly": false
+                }
+            },
+            {
+                "name": "emr_config_row",
+                "description": "Here we iterate over each row of the load_config.csv file, which is basically each table",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "emr_config",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('emr_config').output.value",
+                        "type": "Expression"
+                    },
+                    "isSequential": false,
+                    "batchCount": 5,
+                    "activities": [
+                        {
+                            "name": "bronze_file_exists",
+                            "description": "Now for each row/ table of the load_config.csv file, we first check whether the files exists or not in Bronze",
+                            "type": "GetMetadata",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.12:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "dataset": {
+                                    "referenceName": "ds_adls_parquet_file",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "container": {
+                                            "value": "@pipeline().parameters.bronze_container_name",
+                                            "type": "Expression"
+                                        },
+                                        "file_path": {
+                                            "value": "@item().targetpath",
+                                            "type": "Expression"
+                                        },
+                                        "file_name": {
+                                            "value": "@split(item().tablename,'.')[1]",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                },
+                                "fieldList": [
+                                    "exists"
+                                ],
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true,
+                                    "enablePartitionDiscovery": false
+                                },
+                                "formatSettings": {
+                                    "type": "ParquetReadSettings"
+                                }
+                            }
+                        },
+                        {
+                            "name": "if_bronze_file_exists",
+                            "description": "If file exits, then that is old data and needs to be archived as we are be bringing new data (CDC) from source which in our case is Azure SQL dB.",
+                            "type": "IfCondition",
+                            "dependsOn": [
+                                {
+                                    "activity": "bronze_file_exists",
+                                    "dependencyConditions": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "expression": {
+                                    "value": "@activity('bronze_file_exists').output.exists",
+                                    "type": "Expression"
+                                },
+                                "ifTrueActivities": [
+                                    {
+                                        "name": "archive",
+                                        "description": "Bronze old files archival activity",
+                                        "type": "Copy",
+                                        "dependsOn": [],
+                                        "policy": {
+                                            "timeout": "0.12:00:00",
+                                            "retry": 0,
+                                            "retryIntervalInSeconds": 30,
+                                            "secureOutput": false,
+                                            "secureInput": false
+                                        },
+                                        "userProperties": [],
+                                        "typeProperties": {
+                                            "source": {
+                                                "type": "ParquetSource",
+                                                "storeSettings": {
+                                                    "type": "AzureBlobFSReadSettings",
+                                                    "recursive": true,
+                                                    "enablePartitionDiscovery": false
+                                                },
+                                                "formatSettings": {
+                                                    "type": "ParquetReadSettings"
+                                                }
+                                            },
+                                            "sink": {
+                                                "type": "ParquetSink",
+                                                "storeSettings": {
+                                                    "type": "AzureBlobFSWriteSettings"
+                                                },
+                                                "formatSettings": {
+                                                    "type": "ParquetWriteSettings"
+                                                }
+                                            },
+                                            "enableStaging": false,
+                                            "translator": {
+                                                "type": "TabularTranslator",
+                                                "typeConversion": true,
+                                                "typeConversionSettings": {
+                                                    "allowDataTruncation": true,
+                                                    "treatBooleanAsNumber": false
+                                                }
+                                            }
+                                        },
+                                        "inputs": [
+                                            {
+                                                "referenceName": "ds_adls_parquet_file",
+                                                "type": "DatasetReference",
+                                                "parameters": {
+                                                    "container": {
+                                                        "value": "@pipeline().parameters.bronze_container_name",
+                                                        "type": "Expression"
+                                                    },
+                                                    "file_path": "@item().targetpath",
+                                                    "file_name": "@split(item().tablename,'.')[1]"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": [
+                                            {
+                                                "referenceName": "ds_adls_parquet_file",
+                                                "type": "DatasetReference",
+                                                "parameters": {
+                                                    "container": "@pipeline().parameters.bronze_container_name",
+                                                    "file_path": "@concat(  item().targetpath,  '/archive/',  formatDateTime(utcNow(),'yyyy'),  '/',  formatDateTime(utcNow(),'MM'),  '/',  formatDateTime(utcNow(),'dd') )",
+                                                    "file_name": "@split(item().tablename,'.')[1]"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "active_flag",
+                            "description": "Again for each row/ table of the load_config.csv file, we first check whether the we need to process data for that table or not by checking whether the Flag is 0 or 1",
+                            "type": "IfCondition",
+                            "dependsOn": [
+                                {
+                                    "activity": "if_bronze_file_exists",
+                                    "dependencyConditions": [
+                                        "Succeeded"
+                                    ]
+                                }
+                            ],
+                            "userProperties": [],
+                            "typeProperties": {
+                                "expression": {
+                                    "value": "@equals(int(item().is_active),1)",
+                                    "type": "Expression"
+                                },
+                                "ifTrueActivities": [
+                                    {
+                                        "name": "pl_copy_from_emr",
+                                        "description": "If active, then the child pipeline is called to copy the data for that table from Azure SQL to ADLS Bronze.",
+                                        "type": "ExecutePipeline",
+                                        "dependsOn": [],
+                                        "policy": {
+                                            "secureInput": false
+                                        },
+                                        "userProperties": [],
+                                        "typeProperties": {
+                                            "pipeline": {
+                                                "referenceName": "pl_copy_from_emr",
+                                                "type": "PipelineReference"
+                                            },
+                                            "waitOnCompletion": true
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "parameters": {
+            "emr_config_container": {
+                "type": "string",
+                "defaultValue": "configs"
+            },
+            "emr_config_file_path": {
+                "type": "string",
+                "defaultValue": "emr"
+            },
+            "emr_config_file_name": {
+                "type": "string",
+                "defaultValue": "load_config.csv"
+            },
+            "bronze_container_name": {
+                "type": "string",
+                "defaultValue": "bronze"
+            }
+        },
+        "folder": {
+            "name": "rcm"
+        },
+        "annotations": [],
+        "lastPublishTime": "2026-02-09T08:36:44Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

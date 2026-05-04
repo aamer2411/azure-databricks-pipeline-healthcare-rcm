@@ -1,0 +1,74 @@
+{
+    "name": "pl_others_scr_to_bronze",
+    "properties": {
+        "description": "This pipeline brings other data from their respective sources to bronze using databricks notebooks",
+        "activities": [
+            {
+                "name": "brz_API extract ICD codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/02 Bronze/API extract ICD codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "brz_API extract NPI codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/02 Bronze/API extract NPI codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "brz_Landing to Bronze - Claims Data and CPT Codes",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/rcm/02 Bronze/Landing to Bronze - Claims Data & CPT Codes"
+                },
+                "linkedServiceName": {
+                    "referenceName": "ls_adb_notebooks",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "folder": {
+            "name": "rcm"
+        },
+        "annotations": [],
+        "lastPublishTime": "2026-02-09T08:36:44Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}

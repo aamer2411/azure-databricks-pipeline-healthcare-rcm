@@ -1,0 +1,77 @@
+{
+    "name": "pl_main_e2e",
+    "properties": {
+        "description": "This is the master pipeline that orchestrates everything",
+        "activities": [
+            {
+                "name": "pl_emr_src_to_bronze",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "pl_emr_src_to_bronze",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "pl_others_scr_to_bronze",
+                "description": "This pipeline brings other data from their respective sources to bronze using databricks notebooks",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "pl_others_scr_to_bronze",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "pl_slv_to_gld",
+                "description": "This pipeline takes data from bonze and transforms to silver and then gold",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "pl_emr_src_to_bronze",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "pl_others_scr_to_bronze",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "pl_slv_to_gold",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            }
+        ],
+        "folder": {
+            "name": "rcm"
+        },
+        "annotations": [],
+        "lastPublishTime": "2026-02-09T08:36:45Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
