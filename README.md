@@ -265,7 +265,7 @@ The original pipeline was built and executed inside a client's secure VDI enviro
 | Aspect | Production (Client Environment) | This Repository |
 |---|---|---|
 | Environment | Secure client VDI, restricted network | Local development environment |
-| Source data | Live patient and financial data from Hospital A and B EMR systems | Development Azure SQL instances with sample data |
+| Source data | Live patient and financial data from from multiple Hospital EMR systems | Development Azure SQL instances with sample data |
 | Hospital systems | Real production EMR databases across multiple acquired facilities | Two dev SQL databases (`hosa`, `hosb`) replicating the multi-hospital structure |
 | Claims and CPT data | Files delivered by client billing systems on schedule | Sample CSV files dropped manually to the Landing zone |
 | External APIs | Production CMS NPI and WHO ICD-10 API calls with rate controls | Same public APIs, small result sets |
