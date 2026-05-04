@@ -117,7 +117,7 @@ Seven Databricks notebooks (also in `pl_slv_to_gold`) build a Star Schema from S
 ```
 .
 ├── README.md
-├── PROJECT_DETAILS.md                         Full technical write-up
+├── Full_Project_Walkthrough.md                Full technical write-up
 │
 ├── notebooks/                                 Databricks notebooks (.py source export)
 │   ├── README.md                              Notebook inventory and setup guide
